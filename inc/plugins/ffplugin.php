@@ -4,7 +4,7 @@
  * Followers/Following Plugin for MyBB (v1.0) by EvolSoft
  * Developer: EvolSoft
  * Website: http://www.evolsoft.tk
- * Date: 06/08/2015 01:43 PM (UTC)
+ * Date: 08/08/2015 04:29 PM (UTC)
  * Copyright & License: (C) 2015 EvolSoft
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -57,7 +57,7 @@ function ffplugin_install(){
 	);
 	$db->insert_query("templates", $insert_array);
 	//Modal List template
-	$template = "{\$ffplugin_content}</tr>{\$ffplugin_pagination}";
+	$template = "{\$ffplugin_content}</tr>";
 	$insert_array = array(
 			"title" => "ffplugin_mlist",
 			"template" => $db->escape_string($template),
@@ -77,7 +77,7 @@ function ffplugin_install(){
 	);
 	$db->insert_query("templates", $insert_array);
 	//Modal Item template
-	$template = "<tr><td class=\"trow1\" width=\"1%\"><a href=\"{\$ffplugin_profilepage}\"><img src=\"{\$ffplugin_avatar}\" width=\"{\$ffplugin_avatar_width}\" height=\"{\$ffplugin_avatar_height}\"></a></td><td class=\"trow1\"><a href=\"{\$ffplugin_profilepage}\">{\$ffplugin_username}</a><div><span class=\"smalltext\">{\$ffplugin_usergroup}<br></span><span class=\"smalltext\"><strong>Posts:</strong> {\$ffplugin_userposts} <strong>Threads:</strong> {\$ffplugin_userthreads}<br></span></div></td></tr>";
+	$template = "<tr><td class=\"trow1\" width=\"1%\"><a href=\"{\$ffplugin_profilepage}\"><img src=\"{\$ffplugin_avatar}\" width=\"{\$ffplugin_avatar_width}\" height=\"{\$ffplugin_avatar_height}\"></a></td><td class=\"trow1\"><a href=\"{\$ffplugin_profilepage}\">{\$ffplugin_username}</a><div><span class=\"smalltext\">{\$ffplugin_usertitle}<br></span><span class=\"smalltext\"><strong>Posts:</strong> {\$user['postnum']} <strong>Threads:</strong> {\$user['threadnum']}<br></span></div></td></tr>";
 	$insert_array = array(
 			"title" => "ffplugin_mitem",
 			"template" => $db->escape_string($template),
@@ -106,7 +106,7 @@ function ffplugin_install(){
 			"dateline" => time()
 	);
 	$db->insert_query("templates", $insert_array);
-	require_once MYBB_ROOT."/inc/adminfunctions_templates.php";
+	require_once MYBB_ROOT . "/inc/adminfunctions_templates.php";
 	find_replace_templatesets("headerinclude", "#" . preg_quote('<script type="text/javascript" src="{$mybb->asset_url}/jscripts/ffplugin.js"></script>') . "#i", '');
 	find_replace_templatesets("headerinclude", "#" . preg_quote('{$stylesheets}') . "#i", "<script type=\"text/javascript\" src=\"{\$mybb->asset_url}/jscripts/ffplugin.js\"></script>\n{\$stylesheets}");
 	find_replace_templatesets("member_profile", "#" . preg_quote('{$ffplugin_following}') . "#i", '');
@@ -182,11 +182,11 @@ function ffplugin_install(){
 	$db->insert_query("settings", $ffplugin_setting);
 	//Number of displayed rows in modal
 	$ffplugin_setting = array(
-			"name" => "ffplugin_mnr",
+			"name" => "ffplugin_nodr",
 			"title" => "How many rows do you want to see on the Following/Followers modal?",
 			"description" => "",
 			"optionscode" => "numeric",
-			"value" => "10",
+			"value" => "6",
 			"disporder" => 6,
 			"gid" => intval($gid),
 	);
@@ -289,14 +289,8 @@ function start(){
 }
 
 function process_profile(){
-    global $db, $mybb, $templates, $ffplugin_following, $ffplugin_followers, $ffplugin_title, $ffplugin_btn, $buddy_options, $myprofile_buddylist, $ffplugin_content, $ffplugin_action, $ffplugin_uid, $ffplugin_status, $ffplugin_badge, $ffplugin_badge_id, $ffplugin_num, $ffplugin_colspan, $ffplugin_profilepage, $ffplugin_avatar, $ffplugin_avatar_width, $ffplugin_avatar_height, $ffplugin_username;
-    require_once MYBB_ROOT."/inc/adminfunctions_templates.php";
-    /*$query = $db->simple_select("usergroups", "*", "");
-    while($group = $db->fetch_array($query)){
-    	var_dump($group);
-    }
-    echo "<br>";
-    var_dump(get_user(2));*/
+    global $db, $mybb, $templates, $ffplugin_following, $ffplugin_followers, $ffplugin_title, $ffplugin_btn, $buddy_options, $myprofile_buddylist, $ffplugin_content, $ffplugin_action, $ffplugin_uid, $ffplugin_status, $ffplugin_badge, $ffplugin_badge_id, $ffplugin_num, $ffplugin_colspan, $ffplugin_profilepage, $ffplugin_avatar, $ffplugin_avatar_width, $ffplugin_avatar_height, $ffplugin_username, $user;
+    require_once MYBB_ROOT . "/inc/adminfunctions_templates.php";
     if(ffplugin_is_installed()){
 	    if($mybb->settings['ffplugin_sn'] == 1){
 	    	if(countf($mybb->input['uid'], true) > 0){
@@ -375,16 +369,15 @@ function countf($uid, $following){
 
 function getName($uid){
 	global $db;
-	$query = $db->simple_select("usergroups", "*", "");
-	while($group = $db->fetch_array($query)){
-		if($group['gid'] == get_user($uid)['usergroup']){
-			return str_replace("{username}", get_user($uid)['username'], $group['namestyle']);
-		}
-	}
+	return format_name(get_user($uid)['username'], get_user($uid)['usergroup'], get_user($uid)['displaygroup']);
+}
+
+function getUserTitle($uid){
+	
 }
 
 function processList($uid, $following){
-	global $db, $mybb, $templates, $ffplugin_content, $ffplugin_profilepage, $ffplugin_avatar, $ffplugin_avatar_colspan, $ffplugin_avatar_width, $ffplugin_avatar_height, $ffplugin_username;
+	global $db, $mybb, $templates, $ffplugin_content, $ffplugin_profilepage, $ffplugin_avatar, $ffplugin_avatar_colspan, $ffplugin_avatar_width, $ffplugin_avatar_height, $ffplugin_username, $user;
 	$list = array();
 	$content = "";
 	if($following){
@@ -399,6 +392,7 @@ function processList($uid, $following){
 			$n = $i * $mybb->settings['ffplugin_nodu'] + $l;
 			$status = isset($list[$n]);
 			if($status){
+				$user = get_user($list[$i][0]);
 				eval('$ffplugin_username = "' . addslashes(getName($list[$n][0])) . '";');
 				eval('$ffplugin_profilepage = "member.php?action=profile&uid=' . $list[$n][0] .'";');
 				eval('$ffplugin_avatar_colspan = "1";');
@@ -425,8 +419,9 @@ function processList($uid, $following){
 	eval('$ffplugin_content = "$content";');
 }
 
-function processModalList($uid, $following){
-	global $db, $mybb, $templates, $ffplugin_content, $ffplugin_profilepage, $ffplugin_avatar, $ffplugin_avatar_colspan, $ffplugin_avatar_width, $ffplugin_avatar_height, $ffplugin_username;
+function processModalList($uid, $following, $page = 0){
+	global $db, $mybb, $templates, $ffplugin_content, $ffplugin_profilepage, $ffplugin_avatar, $ffplugin_avatar_colspan, $ffplugin_avatar_width, $ffplugin_avatar_height, $ffplugin_username, $user, $ffplugin_usertitle;
+	require_once MYBB_ROOT . "/inc/functions_user.php";
 	$list = array();
 	$content = "";
 	if($following){
@@ -434,15 +429,12 @@ function processModalList($uid, $following){
 	}else{
 		$list = mysqli_fetch_all($db->query("SELECT following FROM " . TABLE_PREFIX . "ffplugin WHERE follower='" . $uid . "'"));
 	}
-	$status = true;
-	for($i = 0; $i < $mybb->settings['ffplugin_mnr']; $i++){
-		
-	}
-	for($i = 0; $i < $mybb->settings['ffplugin_mnr']; $i++){
+	for($i = ($page * $mybb->settings['ffplugin_nodr']); $i < ($page * $mybb->settings['ffplugin_nodr'] + $mybb->settings['ffplugin_nodr']); $i++){
 		if(isset($list[$i])){
+			$user = get_user($list[$i][0]);
+			$usertitle = $usertitle;
 			eval('$ffplugin_username = "' . addslashes(getName($list[$i][0])) . '";');
-			eval('$ffplugin_userposts = "' . get_user($list[$i][0])['postnum'] . '";');
-			eval('$ffplugin_userthreads = "' . get_user($list[$i][0])['threadnum'] . '";');
+			eval('$ffplugin_usertitle = "' . get_usertitle($list[$i][0]) . '";');
 			eval('$ffplugin_profilepage = "member.php?action=profile&uid=' . $list[$i][0] .'";');
 			eval('$ffplugin_avatar_colspan = "1";');
 			eval('$ffplugin_avatar_width = "' . explode('x', $mybb->settings['ffplugin_as'])[0] . '";');
@@ -458,7 +450,13 @@ function processModalList($uid, $following){
 			break;
 		}
 	}
-	eval('$ffplugin_content = "$content";');
+	if(isset($list[$page * $mybb->settings['ffplugin_nodr'] + $mybb->settings['ffplugin_nodr']])){
+		if($following){
+			eval("\$content .= \"<tr><td class=\\\"trow2\\\" colspan=\\\"2\\\" style=\\\"text-align: right\\\"><a class=\\\"button small_button\\\" rel=\\\"modal:close\\\" href=\\\"\\\" onclick=\\\"MyBB.popupWindow('ffactions.php?action=showfollowinglist&uid=" . $uid . "&page=" . ($page + 1) . "', null, true); return false;\\\">More...</a></td></tr>\";");
+		}else{
+			eval("\$content .= \"<tr><td class=\\\"trow2\\\" colspan=\\\"2\\\" style=\\\"text-align: right\\\"><a class=\\\"button small_button\\\" rel=\\\"modal:close\\\" href=\\\"\\\" onclick=\\\"MyBB.popupWindow('ffactions.php?action=showfollowerslist&uid=" . $uid . "&page=" . ($page + 1) . "', null, true); return false;\\\">More...</a></td></tr>\";");
+		}
+	}
 	return $content;
 }
 
