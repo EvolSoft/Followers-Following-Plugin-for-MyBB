@@ -18,7 +18,7 @@ PHP >= 5.4.0<br>
 
 ***This is the first release of my first MyBB plugin. It may contain bugs or it may not work as expected. If you have problems with this plugin you can report bugs on the GitHub Issue Tracker.***
 
-With Followers/Following Plugin you can implement a very advanced followers/following system to use in your MyBB forums. The plugin has lots of features like the MyAlerts support and it is also highly customizable.
+With Followers/Following Plugin you can implement a very advanced followers/following system to use in your MyBB forums. The plugin has lots of features like the MyAlerts support and it is also highly customizable.<br>
 ***By default this plugin disables the MyBB Buddy List but if you want to keep both, you can enable the MyBB buddy list from plugin settings.***<br>
 ***If you want to keep the buddy list disabled, please consider that some buddy list related template variables must be removed manually from the ACP template editor.***
 
