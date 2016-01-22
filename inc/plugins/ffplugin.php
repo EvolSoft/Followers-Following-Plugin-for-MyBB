@@ -4,8 +4,8 @@
  * Followers/Following Plugin for MyBB (v1.0) by EvolSoft
  * Developer: EvolSoft
  * Website: http://www.evolsoft.tk
- * Date: 08/08/2015 04:29 PM (UTC)
- * Copyright & License: (C) 2015 EvolSoft
+ * Date: 22/01/2016 07:21 PM (UTC)
+ * Copyright & License: (C) 2015-2016 EvolSoft
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -234,8 +234,8 @@ function ffplugin_is_installed(){
 
 function ffplugin_activate(){
 	global $db;
-	if(!$db->table_exists($prefix . "ffplugin")) {
-		$db->query("CREATE TABLE " . TABLE_PREFIX . "ffplugin (following VARCHAR(100), follower VARCHAR(100))");
+	if(!$db->table_exists("ffplugin")) {
+		$db->write_query("CREATE TABLE " . TABLE_PREFIX . "ffplugin (following VARCHAR(100), follower VARCHAR(100))");
 	}
 	//MyAlerts stuff
 	if(class_exists('MybbStuff_MyAlerts_AlertTypeManager')){
@@ -266,14 +266,14 @@ function ffplugin_uninstall(){
 	global $mybb, $db, $cache;
 	$db->drop_table("ffplugin");
 	$db->delete_query("templates", "title = 'ffplugin'");
-	$db->query("DELETE FROM " . TABLE_PREFIX . "settings WHERE name LIKE '%ffplugin%'");
-	$db->query("DELETE FROM " . TABLE_PREFIX . "settinggroups WHERE name='ffplugin'");
-	$db->query("DELETE FROM " . TABLE_PREFIX . "templates WHERE title='ffplugin_list'");
-	$db->query("DELETE FROM " . TABLE_PREFIX . "templates WHERE title='ffplugin_mlist'");
-	$db->query("DELETE FROM " . TABLE_PREFIX . "templates WHERE title='ffplugin_item'");
-	$db->query("DELETE FROM " . TABLE_PREFIX . "templates WHERE title='ffplugin_mitem'");
-	$db->query("DELETE FROM " . TABLE_PREFIX . "templates WHERE title='ffplugin_badge'");
-	$db->query("DELETE FROM " . TABLE_PREFIX . "templates WHERE title='ffplugin_btn'");
+	$db->delete_query("settings", "name LIKE '%ffplugin%'");
+	$db->delete_query("settinggroups", "name='ffplugin'");
+	$db->delete_query("templates", "title='ffplugin_list'");
+	$db->delete_query("templates", "title='ffplugin_mlist'");
+	$db->delete_query("templates", "title='ffplugin_item'");
+	$db->delete_query("templates", "title='ffplugin_mitem'");
+	$db->delete_query("templates", "title='ffplugin_badge'");
+	$db->delete_query("templates", "title='ffplugin_btn'");
 	rebuild_settings();
 }
 
@@ -293,26 +293,26 @@ function process_profile(){
     require_once MYBB_ROOT . "/inc/adminfunctions_templates.php";
     if(ffplugin_is_installed()){
 	    if($mybb->settings['ffplugin_sn'] == 1){
-	    	if(countf($mybb->input['uid'], true) > 0){
-	    		eval('$ffplugin_num = "' . countf($mybb->input['uid'], true) . '";');
+	    	if(countf(get_user($mybb->input['uid'], MyBB::INPUT_INT)['uid'], true) > 0){
+	    		eval('$ffplugin_num = "' . countf(get_user($mybb->input['uid'], MyBB::INPUT_INT)['uid'], true) . '";');
 	    		eval('$ffplugin_badge_id = "following";');
 	    		eval('$ffplugin_badge = "' . $templates->get('ffplugin_badge') . '";');
 	    		eval('$ffplugin_colspan = "' . $mybb->settings['ffplugin_nodu'] . '";');
 	    		eval('$ffplugin_title = "Following";');
 	    		eval('$ffplugin_action = "showfollowinglist";');
-	    		eval('$ffplugin_uid = "' . $mybb->input['uid'] . '";');
-	    		processList($mybb->input['uid'], true);
+	    		eval('$ffplugin_uid = "' . get_user($mybb->input['uid'], MyBB::INPUT_INT)['uid'] . '";');
+	    		processList(get_user($mybb->input['uid'], MyBB::INPUT_INT)['uid'], true);
 	    		eval('$ffplugin_following = "' . $templates->get('ffplugin_list') . '";');
 	    	}
-	    	if(countf($mybb->input['uid'], false) > 0){
+	    	if(countf(get_user($mybb->input['uid'], MyBB::INPUT_INT)['uid'], false) > 0){
 		    	eval('$ffplugin_badge_id = "followers";');
-		    	eval('$ffplugin_num = "' . countf($mybb->input['uid'], false) . '";');
+		    	eval('$ffplugin_num = "' . countf(get_user($mybb->input['uid'], MyBB::INPUT_INT)['uid'], false) . '";');
 		    	eval('$ffplugin_badge = "' . $templates->get('ffplugin_badge') . '";');
 		    	eval('$ffplugin_colspan = "' . $mybb->settings['ffplugin_nodu'] . '";');
 		    	eval('$ffplugin_title = "Followers";');
 		    	eval('$ffplugin_action = "showfollowerslist";');
-		    	eval('$ffplugin_uid = "' . $mybb->input['uid'] . '";');
-		    	processList($mybb->input['uid'], false);
+		    	eval('$ffplugin_uid = "' . get_user($mybb->input['uid'], MyBB::INPUT_INT)['uid'] . '";');
+		    	processList(get_user($mybb->input['uid'], MyBB::INPUT_INT)['uid'], false);
 		    	eval('$ffplugin_followers = "' . $templates->get('ffplugin_list') . '";');
 	    	}
 	    }else{
@@ -320,17 +320,17 @@ function process_profile(){
 	    	eval('$ffplugin_badge = "";');
 	    	eval('$ffplugin_title = "Following";');
 	    	eval('$ffplugin_action = "showfollowinglist";');
-	    	eval('$ffplugin_uid = "' . $mybb->input['uid'] . '";');
-	    	processList($mybb->input['uid'], true);
+	    	eval('$ffplugin_uid = "' . get_user($mybb->input['uid'], MyBB::INPUT_INT)['uid'] . '";');
+	    	processList(get_user($mybb->input['uid'], MyBB::INPUT_INT)['uid'], true);
 	    	eval('$ffplugin_following = "' . $templates->get('ffplugin_list') . '";');
 	    	eval('$ffplugin_title = "Followers";');
 	    	eval('$ffplugin_action = "showfollowerslist";');
-	    	eval('$ffplugin_uid = "' . $mybb->input['uid'] . '";');
-	    	processList($mybb->input['uid'], false);
+	    	eval('$ffplugin_uid = "' . get_user($mybb->input['uid'], MyBB::INPUT_INT)['uid'] . '";');
+	    	processList(get_user($mybb->input['uid'], MyBB::INPUT_INT)['uid'], false);
 	    	eval('$ffplugin_followers = "' . $templates->get('ffplugin_list') . '";');
 	    }
-	   	if($mybb->user['uid'] != 0 && $mybb->input['uid'] != $mybb->user['uid']){
-	   		check($mybb->input['uid']);
+	   	if($mybb->user['uid'] != 0 && get_user($mybb->input['uid'], MyBB::INPUT_INT)['uid'] != $mybb->user['uid']){
+	   		check(get_user($mybb->input['uid'], MyBB::INPUT_INT)['uid']);
 	   		eval('$ffplugin_btn = "' .  $templates->get('ffplugin_btn') . '";');
 	   	}else{
 	   		eval('$ffplugin_btn = "";');
@@ -346,7 +346,7 @@ function process_profile(){
 function check($uid){
 	global $db, $mybb, $templates, $ffplugin_action, $ffplugin_uid, $ffplugin_status;
 	if(ffplugin_is_installed()){
-		if(mysqli_num_rows($db->query("SELECT * FROM " . TABLE_PREFIX . "ffplugin WHERE following='" . $mybb->user['uid'] . "' AND follower='" . $uid . "'")) == 0){
+		if($db->num_rows($db->simple_select("ffplugin", "*", "following='" . intval($uid) . "' AND follower='" . $mybb->user['uid'] . "'")) == 0){
 			eval('$ffplugin_action = "follow";');
 			eval('$ffplugin_uid = "' . $uid . '";');
 			eval('$ffplugin_status = "Follow";');
@@ -361,9 +361,9 @@ function check($uid){
 function countf($uid, $following){
 	global $db;
 	if($following){
-		return mysqli_num_rows($db->query("SELECT * FROM " . TABLE_PREFIX . "ffplugin WHERE following='" . $uid . "'"));
+		return $db->num_rows($db->simple_select("ffplugin", "*", "follower='" . intval($uid) . "'"));
 	}else{
-		return mysqli_num_rows($db->query("SELECT * FROM " . TABLE_PREFIX . "ffplugin WHERE follower='" . $uid . "'"));
+		return $db->num_rows($db->simple_select("ffplugin", "*", "following='" . intval($uid) . "'"));
 	}
 }
 
@@ -381,9 +381,19 @@ function processList($uid, $following){
 	$list = array();
 	$content = "";
 	if($following){
-		$list = mysqli_fetch_all($db->query("SELECT follower FROM " . TABLE_PREFIX . "ffplugin WHERE following='" . $uid . "'"));
+		$count = 0;
+		$query = $db->simple_select("ffplugin", "following", "follower='" . intval($uid) . "'");
+		while($result = $db->fetch_array($query)){
+			$list[$count] = $result["following"];
+			$count++;
+		}
 	}else{
-		$list = mysqli_fetch_all($db->query("SELECT following FROM " . TABLE_PREFIX . "ffplugin WHERE follower='" . $uid . "'"));
+		$count = 0;
+		$query = $db->simple_select("ffplugin", "follower", "following='" . intval($uid) . "'");
+		while($result = $db->fetch_array($query)){
+			$list[$count] = $result["follower"];
+			$count++;
+		}
 	}
 	$status = true;
 	$n = 0;
@@ -424,10 +434,20 @@ function processModalList($uid, $following, $page = 0){
 	require_once MYBB_ROOT . "/inc/functions_user.php";
 	$list = array();
 	$content = "";
-	if($following){
-		$list = mysqli_fetch_all($db->query("SELECT follower FROM " . TABLE_PREFIX . "ffplugin WHERE following='" . $uid . "'"));
+if($following){
+		$count = 0;
+		$query = $db->simple_select("ffplugin", "following", "follower='" . intval($uid) . "'");
+		while($result = $db->fetch_array($query)){
+			$list[$count] = $result["following"];
+			$count++;
+		}
 	}else{
-		$list = mysqli_fetch_all($db->query("SELECT following FROM " . TABLE_PREFIX . "ffplugin WHERE follower='" . $uid . "'"));
+		$count = 0;
+		$query = $db->simple_select("ffplugin", "follower", "following='" . intval($uid) . "'");
+		while($result = $db->fetch_array($query)){
+			$list[$count] = $result["follower"];
+			$count++;
+		}
 	}
 	for($i = ($page * $mybb->settings['ffplugin_nodr']); $i < ($page * $mybb->settings['ffplugin_nodr'] + $mybb->settings['ffplugin_nodr']); $i++){
 		if(isset($list[$i])){
