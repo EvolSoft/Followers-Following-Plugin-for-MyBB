@@ -2,8 +2,8 @@
  * Followers/Following Plugin for MyBB (v1.0) by EvolSoft
  * Developer: EvolSoft
  * Website: http://www.evolsoft.tk
- * Date: 05/08/2015 02:15 PM (UTC)
- * Copyright & License: (C) 2015 EvolSoft
+ * Date: 22/01/2016 07:45 PM (UTC)
+ * Copyright & License: (C) 2015-2016 EvolSoft
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
